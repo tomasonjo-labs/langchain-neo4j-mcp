@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Union
 
-logger = logging.getLogger("mcp_neo4j_vector")
+logger = logging.getLogger("mcp_neo4j_vector_langchain")
 logger.setLevel(logging.INFO)
 
 

@@ -1,5 +1,5 @@
 import logging
-from typing import Literal, Optional
+from typing import Literal
 
 from fastmcp.exceptions import ToolError
 from fastmcp.server import FastMCP
@@ -11,7 +11,7 @@ from pydantic import Field
 from langchain_neo4j import Neo4jVector
 from langchain.embeddings import init_embeddings
 
-logger = logging.getLogger("mcp_neo4j_vector")
+logger = logging.getLogger("mcp_neo4j_vector_langchain")
 
 def format_as_xml(data, query):
     if not data:
@@ -45,7 +45,7 @@ def create_mcp_server(
     vector_store: Neo4jVector, namespace: str = ""
 ) -> FastMCP:
     mcp: FastMCP = FastMCP(
-        "mcp-neo4j-vector", dependencies=["langchain-neo4j", "pydantic"], stateless_http=True
+        "mcp-neo4j-vector-langchain", dependencies=["langchain-neo4j", "pydantic"], stateless_http=True
     )
 
     namespace_prefix = _format_namespace(namespace)

@@ -950,7 +950,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mcp-neo4j-vector"
+name = "mcp-neo4j-vector-langchain"
 version = "0.3.1"
 source = { editable = "." }
 dependencies = [

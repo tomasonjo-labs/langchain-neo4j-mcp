@@ -1,5 +1,5 @@
 [project]
-name = "mcp-neo4j-vector"
+name = "mcp-neo4j-vector-langchain"
 version = "0.3.1"
 description = "A simple Neo4j MCP server using langchain vector store"
 readme = "README.md"
@@ -26,4 +26,4 @@ dev-dependencies = [
 ]
 
 [project.scripts]
-mcp-neo4j-vector = "mcp_neo4j_vector:main"
+mcp-neo4j-vector-langchain = "mcp_neo4j_vector_langchain:main"
