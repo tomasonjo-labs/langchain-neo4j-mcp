@@ -1,11 +1,9 @@
-## Example usage
-
 ```
 {
   "mcpServers": {
     "neo4j-dev": {
       "command": "uv",
-      "args": ["--directory", "/path/to/servers/mcp-neo4j-vector-langchain", "run", "mcp-neo4j-vector-langchain", "--transport", "stdio", "--namespace", "dev"],
+      "args": ["--directory", "/path/to/servers/mcp-neo4j-vector-graphrag", "run", "mcp-neo4j-vector-graphrag", "--transport", "stdio", "--namespace", "dev"],
       "env": {
         "NEO4J_URI": "neo4j+s://demo.neo4jlabs.com:7687",
         "NEO4J_USERNAME": "recommendations",
