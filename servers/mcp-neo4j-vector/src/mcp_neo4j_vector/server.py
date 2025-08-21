@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Literal
+from typing import Literal, Optional
 
 from fastmcp.exceptions import ToolError
 from fastmcp.server import FastMCP
@@ -7,9 +7,9 @@ from fastmcp.tools.tool import TextContent, ToolResult
 from mcp.types import ToolAnnotations
 from neo4j.exceptions import Neo4jError
 from pydantic import Field
-from langchain_openai import OpenAIEmbeddings
 
 from langchain_neo4j import Neo4jVector
+from langchain.embeddings import init_embeddings
 
 logger = logging.getLogger("mcp_neo4j_vector")
 
@@ -60,10 +60,10 @@ def create_mcp_server(
             openWorldHint=True,
         ),
     )
-    async def find_movies(
-        query: str = Field(..., description="Natural language question to find a movie.")
+    async def vector_search(
+        query: str = Field(..., description="Natural language question to search for.")
     ) -> list[ToolResult]:
-        """Find movies based on natural language input"""
+        """Find relevant documents based on natural language input"""
 
         try:
 
@@ -88,6 +88,10 @@ async def main(
     username: str,
     password: str,
     database: str,
+    index_name: str,
+    embedding_model: str,
+    keyword_index_name: str,
+    retrieval_query: str,
     transport: Literal["stdio", "sse", "http"] = "stdio",
     namespace: str = "",
     host: str = "127.0.0.1",
@@ -96,15 +100,24 @@ async def main(
 ) -> None:
     logger.info("Starting MCP neo4j Server")
 
+    embedding_model = init_embeddings(embedding_model)
+
+    additional_kwargs = {}
+    if keyword_index_name:
+        additional_kwargs["keyword_index_name"] = keyword_index_name
+        additional_kwargs["search_type"] = "hybrid"
+    if retrieval_query:
+        logger.info("RETRIEVAL QUERY")
+        additional_kwargs["retrieval_query"] = retrieval_query
+
     neo4j_vector_store = Neo4jVector.from_existing_index(
-        OpenAIEmbeddings(model='text-embedding-ada-002'),
+        embedding_model,
         url=db_url,
         username=username,
         password=password,
         database=database,
-        index_name="moviePlotsEmbedding",
-        keyword_index_name="movieFulltext",
-        search_type="hybrid"
+        index_name=index_name,
+        **additional_kwargs
     )
 
     mcp = create_mcp_server(neo4j_vector_store, namespace)

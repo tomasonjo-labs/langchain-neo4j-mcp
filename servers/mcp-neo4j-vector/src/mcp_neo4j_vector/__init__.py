@@ -12,6 +12,10 @@ def main():
     parser.add_argument("--username", default=None, help="Neo4j username")
     parser.add_argument("--password", default=None, help="Neo4j password")
     parser.add_argument("--database", default=None, help="Neo4j database name")
+    parser.add_argument("--index-name", default=None, help="Neo4j vector index name")
+    parser.add_argument("--embedding-model", default=None, help="Embedding model to use")
+    parser.add_argument("--keyword-index-name", default=None, help="Neo4j keyword index name for hybrid search")
+    parser.add_argument("--retrieval-query", default=None, help="Custom retrieval query")
     parser.add_argument(
         "--transport", default=None, help="Transport type (stdio, sse, http)"
     )

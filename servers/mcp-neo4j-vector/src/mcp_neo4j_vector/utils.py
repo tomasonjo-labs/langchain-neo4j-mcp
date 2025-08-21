@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Union
 
-logger = logging.getLogger("mcp_neo4j_cypher")
+logger = logging.getLogger("mcp_neo4j_vector")
 logger.setLevel(logging.INFO)
 
 
@@ -72,6 +72,43 @@ def process_config(args: argparse.Namespace) -> dict[str, Union[str, int, None]]
         else:
             logger.warning("Warning: No Neo4j database provided. Using default: neo4j")
             config["database"] = "neo4j"
+
+    # parse index_name (required parameter)
+    if args.index_name is not None:
+        config["index_name"] = args.index_name
+    else:
+        if os.getenv("INDEX_NAME") is not None:
+            config["index_name"] = os.getenv("INDEX_NAME")
+        else:
+            logger.warning("Warning: No Neo4j database provided. Using default: neo4j")
+            config["index_name"] = "vector"
+
+    # parse index_name (required parameter)
+    if args.embedding_model is not None:
+        config["embedding_model"] = args.embedding_model
+    else:
+        if os.getenv("EMBEDDING_MODEL") is not None:
+            config["embedding_model"] = os.getenv("EMBEDDING_MODEL")
+        else:
+            logger.warning("Warning: No Neo4j database provided. Using default: neo4j")
+            config["index_name"] = "openai:text-embedding-3-small"
+    # parse keyword_index_name (optional)
+    if args.keyword_index_name is not None:
+        config["keyword_index_name"] = args.keyword_index_name
+    else:
+        if os.getenv("NEO4J_KEYWORD_INDEX_NAME") is not None:
+            config["keyword_index_name"] = os.getenv("NEO4J_KEYWORD_INDEX_NAME")
+        else:
+            config["keyword_index_name"] = None
+
+    # parse retrieval_query (optional)
+    if args.retrieval_query is not None:
+        config["retrieval_query"] = args.retrieval_query
+    else:
+        if os.getenv("RETRIEVAL_QUERY") is not None:
+            config["retrieval_query"] = os.getenv("RETRIEVAL_QUERY")
+        else:
+            config["retrieval_query"] = None
 
     # parse namespace
     if args.namespace is not None:
