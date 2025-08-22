@@ -72,7 +72,6 @@ async def main(
     database: str,
     index_name: str,
     embedding_model: str,
-    keyword_index_name: str,
     retrieval_query: str,
     transport: Literal["stdio", "sse", "http"] = "stdio",
     namespace: str = "",

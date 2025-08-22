@@ -11,7 +11,6 @@
         "NEO4J_DATABASE": "recommendations",
         "OPENAI_API_KEY": "sk-proj-",
         "INDEX_NAME": "moviePlotsEmbedding",
-        "KEYWORD_INDEX_NAME": "movieFulltext",
         "EMBEDDING_MODEL": "openai:text-embedding-ada-002",
         "RETRIEVAL_QUERY": "RETURN 'Title: ' + coalesce(node.title,'') + 'Plot: ' + coalesce(node.plot, '') AS text, {imdbRating: node.imdbRating} AS metadata, score"
       }

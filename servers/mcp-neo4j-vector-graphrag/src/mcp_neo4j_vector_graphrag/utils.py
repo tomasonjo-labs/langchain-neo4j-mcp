@@ -92,15 +92,6 @@ def process_config(args: argparse.Namespace) -> dict[str, Union[str, int, None]]
         else:
             logger.warning("Warning: No Neo4j database provided. Using default: neo4j")
             config["index_name"] = "openai:text-embedding-3-small"
-    # parse keyword_index_name (optional)
-    if args.keyword_index_name is not None:
-        config["keyword_index_name"] = args.keyword_index_name
-    else:
-        if os.getenv("NEO4J_KEYWORD_INDEX_NAME") is not None:
-            config["keyword_index_name"] = os.getenv("NEO4J_KEYWORD_INDEX_NAME")
-        else:
-            config["keyword_index_name"] = None
-
     # parse retrieval_query (optional)
     if args.retrieval_query is not None:
         config["retrieval_query"] = args.retrieval_query
