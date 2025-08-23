@@ -1,32 +1,35 @@
 {
   "dxt_version": "0.1",
-  "name": "mcp-neo4j-cypher",
-  "display_name": "Neo4j Cypher MCP Server",
-  "version": "0.3.1",
-  "description": "Execute read and write Cypher queries on your Neo4j database.",
-  "long_description": "A Model Context Protocol (MCP) server that provides tools for interacting with Neo4j graph databases using Cypher queries. Supports both read and write operations with proper validation and error handling.",
+  "name": "mcp-neo4j-vector-graphrag",
+  "display_name": "Neo4j Vector GraphRAG MCP Server",
+  "version": "0.1.0",
+  "description": "Execute vector similarity searches with graph traversal on your Neo4j database using the GraphRAG Python package.",
+  "long_description": "A Model Context Protocol (MCP) server that provides vector similarity search capabilities enhanced with graph traversal using the Neo4j GraphRAG Python package. Uses VectorCypherRetriever to perform semantic search and custom Cypher queries for comprehensive knowledge graph retrieval.",
   "author": {
-    "name": "Alexander Gilmore"
+    "name": "Tomaz Bratanic"
   },
-  "keywords": ["neo4j", "cypher", "graph", "database", "mcp", "ai", "llm"],
-  "categories": ["database", "graph", "query"],
+  "keywords": ["neo4j", "graphrag", "vector", "search", "graph", "database", "mcp", "ai", "llm", "cypher", "retrieval"],
+  "categories": ["database", "graph", "search", "vector", "retrieval"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-cypher"
+    "url": "https://github.com/tomasonjo-labs/neo4j-mcp-experiments/tree/main/servers/mcp-neo4j-vector-graphrag"
   },
-  "documentation": "https://github.com/neo4j-contrib/mcp-neo4j/blob/main/servers/mcp-neo4j-cypher/README.md",
-  "support": "https://github.com/neo4j-contrib/mcp-neo4j/issues",
+  "documentation": "https://github.com/tomasonjo-labs/neo4j-mcp-experiments/blob/main/servers/mcp-neo4j-vector-graphrag/README.md",
+  "support": "https://github.com/tomasonjo-labs/neo4j-mcp-experiments/issues",
   "server": {
     "type": "python",
-    "entry_point": "src/mcp_neo4j_cypher/__init__.py",
+    "entry_point": "src/mcp_neo4j_vector_graphrag/__init__.py",
     "mcp_config": {
       "command": "uvx",
-      "args": ["mcp-neo4j-cypher"],
+      "args": ["mcp-neo4j-vector-graphrag"],
       "env": {
         "NEO4J_URI": "${user_config.neo4j_uri}",
         "NEO4J_USERNAME": "${user_config.neo4j_username}",
         "NEO4J_PASSWORD": "${user_config.neo4j_password}",
         "NEO4J_DATABASE": "${user_config.neo4j_database}",
+        "NEO4J_INDEX_NAME": "${user_config.neo4j_index_name}",
+        "EMBEDDING_MODEL": "${user_config.embedding_model}",
+        "RETRIEVAL_QUERY": "${user_config.retrieval_query}",
         "NEO4J_TRANSPORT": "${user_config.transport}",
         "NEO4J_NAMESPACE": "${user_config.neo4j_namespace}",
         "NEO4J_MCP_SERVER_HOST": "${user_config.mcp_server_host}",
@@ -37,22 +40,22 @@
   },
   "tools": [
     {
-      "name": "get_neo4j_schema",
-      "description": "Retrieve the schema of the Neo4j database, including node labels, properties, and relationships. Requires that APOC plugin is installed."
-    },
-    {
-      "name": "read_neo4j_cypher",
-      "description": "Execute read-only Cypher queries (MATCH, RETURN, etc.) on the Neo4j database"
-    },
-    {
-      "name": "write_neo4j_cypher",
-      "description": "Execute write Cypher queries (CREATE, MERGE, SET, DELETE, etc.) on the Neo4j database"
+      "name": "neo4j_vector",
+      "description": "Find relevant documents based on natural language input using vector similarity search enhanced with graph traversal"
     }
   ],
   "prompts": [],
   "tools_generated": false,
   "license": "MIT",
   "user_config": {
+    "neo4j_uri": {
+      "type": "string",
+      "title": "Neo4j URI",
+      "description": "The URI for connecting to Neo4j",
+      "default": "bolt://localhost:7687",
+      "required": true,
+      "sensitive": false
+    },
     "neo4j_username": {
       "type": "string",
       "title": "Neo4j Username",
@@ -77,11 +80,27 @@
       "required": false,
       "sensitive": false
     },
-    "neo4j_uri": {
+    "neo4j_index_name": {
       "type": "string",
-      "title": "Neo4j URI",
-      "description": "The URI for connecting to Neo4j",
-      "default": "bolt://localhost:7687",
+      "title": "Vector Index Name",
+      "description": "The name of the vector index to search against",
+      "default": "vector_index",
+      "required": true,
+      "sensitive": false
+    },
+    "embedding_model": {
+      "type": "string",
+      "title": "Embedding Model",
+      "description": "The embedding model to use (e.g., 'openai:text-embedding-3-small', 'sentence-transformers/all-MiniLM-L6-v2')",
+      "default": "openai:text-embedding-3-small",
+      "required": true,
+      "sensitive": false
+    },
+    "retrieval_query": {
+      "type": "string",
+      "title": "Retrieval Query",
+      "description": "Custom Cypher query for graph traversal after vector search. Use 'node' variable to reference found nodes.",
+      "default": "RETURN node.text as content",
       "required": true,
       "sensitive": false
     },
