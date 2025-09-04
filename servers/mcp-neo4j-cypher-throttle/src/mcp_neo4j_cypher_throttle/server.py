@@ -1,7 +1,7 @@
 import json
 import logging
-import os
 import re
+import yaml
 from typing import Any, Literal
 
 import tiktoken
@@ -16,15 +16,40 @@ from pydantic import Field
 
 logger = logging.getLogger("mcp_neo4j_cypher_throttle")
 
-def _truncate_string_to_tokens(text: str, token_limit: int = 2048, model: str = "gpt-4") -> str:
+def _enhance_list_clarity(yaml_str):
+    lines = yaml_str.split('\n')
+    enhanced = []
+    
+    for i, line in enumerate(lines):
+        enhanced.append(line)
+        # Add blank line after list items with multiple fields
+        if (line.startswith('- ') and 
+            i + 1 < len(lines) and 
+            lines[i + 1].startswith('  ') and ':' in lines[i + 1]):
+            # Look ahead to see if this is a multi-field dict
+            j = i + 1
+            field_count = 0
+            while j < len(lines) and lines[j].startswith('  '):
+                if ':' in lines[j]:
+                    field_count += 1
+                j += 1
+            if field_count > 1:  # Multi-field dict, add separator after
+                enhanced.insert(-1, '')  # Add blank line before current item
+    
+    return '\n'.join(enhanced)
+
+
+def _truncate_string_to_tokens(
+    text: str, token_limit: int = 2048, model: str = "gpt-4"
+) -> str:
     """
     Truncates the input string to fit within the specified token limit.
-    
+
     Args:
         text (str): The input text string.
         token_limit (int): Maximum number of tokens allowed. Defaults to 2048.
         model (str): Model name (affects tokenization). Defaults to "gpt-4".
-    
+
     Returns:
         str: The truncated string that fits within the token limit.
     """
@@ -41,6 +66,7 @@ def _truncate_string_to_tokens(text: str, token_limit: int = 2048, model: str = 
     # Decode back into text
     truncated_text = encoding.decode(tokens)
     return truncated_text
+
 
 def _value_sanitize(d: Any, list_limit: int = 52) -> Any:
     """Sanitize the input dictionary or list.
@@ -88,7 +114,6 @@ def _value_sanitize(d: Any, list_limit: int = 52) -> Any:
         return d
 
 
-
 def _format_namespace(namespace: str) -> str:
     if namespace:
         if namespace.endswith("-"):
@@ -106,11 +131,18 @@ def _is_write_query(query: str) -> bool:
         is not None
     )
 
+
 def create_mcp_server(
-    neo4j_driver: AsyncDriver, database: str = "neo4j", namespace: str = "", query_timeout: float = 10.0, token_limit: int = 2048
+    neo4j_driver: AsyncDriver,
+    database: str = "neo4j",
+    namespace: str = "",
+    query_timeout: float = 10.0,
+    token_limit: int = 2048,
 ) -> FastMCP:
     mcp: FastMCP = FastMCP(
-        "mcp-neo4j-cypher-throttle", dependencies=["neo4j", "pydantic", "tiktoken"], stateless_http=True
+        "mcp-neo4j-cypher-throttle",
+        dependencies=["neo4j", "pydantic", "tiktoken"],
+        stateless_http=True,
     )
 
     namespace_prefix = _format_namespace(namespace)
@@ -255,12 +287,23 @@ def create_mcp_server(
                 result_transformer_=lambda r: r.data(),
             )
 
-            results_json_str = json.dumps([_value_sanitize(el) for el in results], default=str)
-            truncated_results = _truncate_string_to_tokens(results_json_str, token_limit)
+            results_yaml_str = _enhance_list_clarity(yaml.dump(
+                [_value_sanitize(el) for el in results],
+                default_flow_style=False,
+                sort_keys=False,
+                width=float('inf'),
+                indent=1,  # Minimal but still structured
+                allow_unicode=True,
+                explicit_start=True,
+                explicit_end=True
+            ))
+            truncated_results = _truncate_string_to_tokens(
+                results_yaml_str, token_limit
+            )
 
-            logger.debug(f"Read query returned {len(results_json_str)} rows")
-
-            return ToolResult(content=[TextContent(type="text", text=truncated_results)])
+            return ToolResult(
+                content=[TextContent(type="text", text=truncated_results)]
+            )
 
         except Neo4jError as e:
             logger.error(f"Neo4j Error executing read query: {e}\n{query}\n{params}")
@@ -329,7 +372,7 @@ async def main(
     port: int = 8000,
     path: str = "/mcp/",
     query_timeout: float = 10.0,
-    token_limit: int = 2048
+    token_limit: int = 2048,
 ) -> None:
     logger.info("Starting MCP neo4j Server")
 
@@ -341,7 +384,9 @@ async def main(
         ),
     )
 
-    mcp = create_mcp_server(neo4j_driver, database, namespace, query_timeout, token_limit)
+    mcp = create_mcp_server(
+        neo4j_driver, database, namespace, query_timeout, token_limit
+    )
 
     # Run the server with the specified transport
     match transport:
