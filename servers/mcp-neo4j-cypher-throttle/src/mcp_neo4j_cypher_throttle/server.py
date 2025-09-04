@@ -255,7 +255,7 @@ def create_mcp_server(
                 result_transformer_=lambda r: r.data(),
             )
 
-            results_json_str = json.dumps(_value_sanitize(results), default=str)
+            results_json_str = json.dumps([_value_sanitize(el) for el in results], default=str)
             truncated_results = _truncate_string_to_tokens(results_json_str)
 
             logger.debug(f"Read query returned {len(results_json_str)} rows")
