@@ -106,16 +106,6 @@ def _is_write_query(query: str) -> bool:
         is not None
     )
 
-
-def _get_query_timeout() -> float:
-    """Get query timeout from environment variable with default of 10 seconds."""
-    try:
-        return float(os.getenv("QUERY_TIMEOUT", "10"))
-    except ValueError:
-        logger.warning("Invalid QUERY_TIMEOUT value, using default of 10 seconds")
-        return 10.0
-
-
 def create_mcp_server(
     neo4j_driver: AsyncDriver, database: str = "neo4j", namespace: str = "", query_timeout: float = 10.0
 ) -> FastMCP:
