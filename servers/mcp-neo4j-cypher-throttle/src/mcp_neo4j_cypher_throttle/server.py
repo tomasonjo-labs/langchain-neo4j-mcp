@@ -107,7 +107,7 @@ def _is_write_query(query: str) -> bool:
     )
 
 def create_mcp_server(
-    neo4j_driver: AsyncDriver, database: str = "neo4j", namespace: str = "", query_timeout: float = 10.0
+    neo4j_driver: AsyncDriver, database: str = "neo4j", namespace: str = "", query_timeout: float = 10.0, token_limit: int = 2048
 ) -> FastMCP:
     mcp: FastMCP = FastMCP(
         "mcp-neo4j-cypher-throttle", dependencies=["neo4j", "pydantic", "tiktoken"], stateless_http=True
@@ -256,7 +256,7 @@ def create_mcp_server(
             )
 
             results_json_str = json.dumps([_value_sanitize(el) for el in results], default=str)
-            truncated_results = _truncate_string_to_tokens(results_json_str)
+            truncated_results = _truncate_string_to_tokens(results_json_str, token_limit)
 
             logger.debug(f"Read query returned {len(results_json_str)} rows")
 
@@ -328,7 +328,8 @@ async def main(
     host: str = "127.0.0.1",
     port: int = 8000,
     path: str = "/mcp/",
-    query_timeout: float = 10.0
+    query_timeout: float = 10.0,
+    token_limit: int = 2048
 ) -> None:
     logger.info("Starting MCP neo4j Server")
 
@@ -340,7 +341,7 @@ async def main(
         ),
     )
 
-    mcp = create_mcp_server(neo4j_driver, database, namespace, query_timeout)
+    mcp = create_mcp_server(neo4j_driver, database, namespace, query_timeout, token_limit)
 
     # Run the server with the specified transport
     match transport:

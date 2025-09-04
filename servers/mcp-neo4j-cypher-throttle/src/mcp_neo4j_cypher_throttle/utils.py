@@ -101,6 +101,24 @@ def process_config(args: argparse.Namespace) -> dict[str, Union[str, int, None]]
             )
             config["query_timeout"] = 10
 
+    # parse token limit
+    if args.token_limit is not None:
+        config["token_limit"] = args.token_limit
+    else:
+        if os.getenv("TOKEN_LIMIT") is not None:
+            try:
+                config["token_limit"] = int(os.getenv("TOKEN_LIMIT"))
+            except ValueError:
+                logger.warning(
+                    "Warning: TOKEN_LIMIT environment variable is not a valid integer. Using default: 2048"
+                )
+                config["query_timeout"] = 2048
+        else:
+            logger.warning(
+                "Warning: No token_limit provided. Using default: 2048"
+            )
+            config["query_timeout"] = 2048
+
     # parse transport
     if args.transport is not None:
         config["transport"] = args.transport

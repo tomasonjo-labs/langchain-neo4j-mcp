@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--server-host", default=None, help="Server host")
     parser.add_argument("--server-port", default=None, help="Server port")
     parser.add_argument("--query-timeout", default=None, help="Query timeout")
+    parser.add_argument("--token-limit", default=None, help="Token limit")
 
     args = parser.parse_args()
     config = process_config(args)

@@ -32,7 +32,8 @@
         "NEO4J_MCP_SERVER_HOST": "${user_config.mcp_server_host}",
         "NEO4J_MCP_SERVER_PORT": "${user_config.mcp_server_port}",
         "NEO4J_MCP_SERVER_PATH": "${user_config.mcp_server_path}",
-        "QUERY_TIMEOUT": "${user_config.query_timeout}"
+        "QUERY_TIMEOUT": "${user_config.query_timeout}",
+        "TOKEN_LIMIT": "${user_config.token_limit}"
       }
     }
   },
@@ -131,6 +132,14 @@
       "title": "Query timeout",
       "description": "Query timeout in seconds for read and write tools. Defaults to 10s",
       "default": "10",
+      "required": false,
+      "sensitive": false
+    },
+    "token_limit": {
+      "type": "int",
+      "title": "Token limit",
+      "description": "Token limit for responses from the read tool",
+      "default": "2048",
       "required": false,
       "sensitive": false
     }

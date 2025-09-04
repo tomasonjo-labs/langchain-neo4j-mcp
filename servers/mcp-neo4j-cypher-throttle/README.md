@@ -30,7 +30,7 @@ A new sanitization function `_value_sanitize` removes oversized or embedding-lik
 ### ✂️ Token-Based Truncation
 
 * After sanitization, results are tokenized with **`tiktoken`** (defaulting to GPT-4 tokenizer).
-* Responses are truncated to **2048 tokens**.
+* Controlled by the environment variable `TOKEN_LIMIT` (default: `2048` tokens).
 * Guarantees compatibility with downstream LLMs and reduces prompt inflation.
 
 ### 📝 Logging
